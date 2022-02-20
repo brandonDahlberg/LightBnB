@@ -1,6 +1,5 @@
 const properties = require('./json/properties.json');
 const users = require('./json/users.json');
-
 const { Pool } = require('pg');
 
 const pool = new Pool({
@@ -10,6 +9,13 @@ const pool = new Pool({
 	database: 'lightbnb',
 });
 /// Users
+pool
+	.connect()
+	.then(() => {
+		console.log('DB connected!');
+	})
+	.catch(error => console.log('Error', error));
+/// Users
 
 /**
  * Get a single user from the database given their email.
@@ -18,14 +24,13 @@ const pool = new Pool({
  */
 const getUserWithEmail = function (email) {
 	return pool
-		.query(`SELECT * FROM users WHERE users.email = $1`, [email])
-		.then(result => console.log(result.rows[0]))
-		.catch(err => {
-			console.log(err.message);
-		});
+		.query(`select * from users where users.email = $1`, [email])
+		.then(result => {
+			return result.rows[0];
+		})
+		.catch(null);
 };
 exports.getUserWithEmail = getUserWithEmail;
-
 /**
  * Get a single user from the database given their id.
  * @param {string} id The id of the user.
@@ -33,13 +38,11 @@ exports.getUserWithEmail = getUserWithEmail;
  */
 const getUserWithId = function (id) {
 	return pool
-		.query(`SELECT * FROM users WHERE users.id = $1`, [id])
-		.then(null, result => {
+		.query(`select * from users where users.id = $1`, [id])
+		.then(result => {
 			return result.rows[0];
 		})
-		.catch(err => {
-			if (err) return null;
-		});
+		.catch(null);
 };
 exports.getUserWithId = getUserWithId;
 
@@ -52,7 +55,7 @@ const addUser = function (user) {
 	return pool
 		.query(
 			`INSERT INTO users (name, email, password)
-    VALUES ($1, $2, $3)`,
+  VALUES ($1, $2, $3) RETURNING *`,
 			[user.name, user.email, user.password]
 		)
 		.then(result => {
@@ -91,7 +94,7 @@ const getAllProperties = (options, limit = 10) => {
 			return result.rows;
 		})
 		.catch(err => {
-			return err.message;
+			console.log(err.message);
 		});
 };
 exports.getAllProperties = getAllProperties;
