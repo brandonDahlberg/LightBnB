@@ -172,6 +172,10 @@ const addProperty = function (property) {
       property.city,
       property.country,
       property.street,
-      property.post_code])
+      property.post_code]).then((result) => {
+        console.log(result.rows);
+      }).catch((err) => {
+        console.log(err.message);
+      })
 };
 exports.addProperty = addProperty;
